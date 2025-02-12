@@ -10,8 +10,10 @@ import (
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
 
+// Function symbol used to configure the server
 type ServerOptsFunc func(*ServerOpts)
 
+// Options used to configure the server
 type ServerOpts struct {
 	// Address to bind
 	Addr string
@@ -22,7 +24,7 @@ type ServerOpts struct {
 	// Max connection limit, will throw an error if exceeded
 	MaxConn int
 
-	// Use TLS to secure connection
+	// Use TLS to secure the connection
 	TLS bool
 }
 
@@ -60,6 +62,7 @@ func defaultServerOpts() ServerOpts {
 	return ServerOpts{
 		Addr:    "127.0.0.1",
 		Port:    8080,
+		TLS:     false,
 		MaxConn: 10,
 	}
 }
@@ -80,7 +83,7 @@ type TcpServer struct {
 
 	// Connections to the server. The key is the client ID,
 	// and the value is the client itself.
-	Conns map[string]client.TCPClient
+	Conns map[string]client.TcpClient
 
 	// Store any errors that occur during the server's lifecycle.
 	Errors []error
@@ -107,7 +110,7 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	// This could be done in the instantiation of the server, but it is
 	// done here to show that the server is created with a max connection
 	// limit.
-	server.Conns = make(map[string]client.TCPClient, server.Opts.MaxConn)
+	server.Conns = make(map[string]client.TcpClient, server.Opts.MaxConn)
 
 	return server
 }
@@ -137,9 +140,10 @@ func (s *TcpServer) Configure(certPath, keyPath string) *TcpServer {
 
 	// TODO: Switch these values to correct production values
 	s.TLSConfig = &tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		ClientAuth:         tls.NoClientCert, // Use tls.RequireAndVerifyClientCert for production and security
-		InsecureSkipVerify: true,             // Use false for production and safety
+		Certificates: []tls.Certificate{cert},
+		// Verifying isn't working right now, need to get certs signed by CA
+		ClientAuth:         tls.RequestClientCert, // Use tls.RequireAndVerifyClientCert for production and security
+		InsecureSkipVerify: true,                  // ONLY FOR TESTING - NEVER IN PRODUCTION
 	}
 
 	return s

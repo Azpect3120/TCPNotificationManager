@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -14,7 +16,7 @@ func handleClient(conn net.Conn) {
 
 	for {
 		n, err := conn.Read(buf[:])
-		if err != nil {
+		if err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, io.EOF) {
 			log.Fatalln(err)
 		}
 		if n > 0 {
@@ -42,7 +44,7 @@ func main() {
 	// 	go handleClient(conn)
 	// }
 
-	s := server.NewTCPServer(server.WithPort(3000))
+	s := server.NewTCPServer(server.WithPort(3000), server.WithTLS())
 	ln := s.Configure("./certs/server.crt", "./certs/server.key").Listen()
 	fmt.Printf("Server: %v\n", s)
 	defer ln.Close()
