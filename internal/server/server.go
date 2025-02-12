@@ -160,9 +160,9 @@ func (s *TcpServer) Listen() net.Listener {
 	var err error
 
 	if s.Opts.TLS && s.TLSConfig != nil {
-		ln, err = tls.Listen("tcp", fmt.Sprintf(":%d", s.Opts.Port), s.TLSConfig)
+		ln, err = tls.Listen("tcp", fmt.Sprintf("%s:%d", s.Opts.Addr, s.Opts.Port), s.TLSConfig)
 	} else {
-		ln, err = net.Listen("tcp", fmt.Sprintf(":%d", s.Opts.Port))
+		ln, err = net.Listen("tcp", fmt.Sprintf("%s:%d", s.Opts.Addr, s.Opts.Port))
 	}
 
 	if err != nil {
