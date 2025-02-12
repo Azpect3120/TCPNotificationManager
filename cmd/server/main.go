@@ -42,6 +42,18 @@ func main() {
 	// 	go handleClient(conn)
 	// }
 
-	s := server.NewTCPServer(server.WithPort(3000))
+	s := server.NewTCPServer(server.WithPort(3000), server.WithTLS())
+	ln := s.Configure("./certs/server.crt", "./certs/server.key").Listen()
+	for _, error := range s.Errors {
+		fmt.Println(error)
+	}
 	fmt.Printf("Server: %v\n", s)
+	defer ln.Close()
+
+	for {
+		if _, err := ln.Accept(); err != nil {
+			fmt.Println(err)
+		}
+
+	}
 }
