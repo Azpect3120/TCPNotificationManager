@@ -56,7 +56,7 @@ func main() {
 		}
 		defer conn.Close()
 
-		go handleClient(conn)
+		go s.HandleConnection(conn)
 
 	}
 }

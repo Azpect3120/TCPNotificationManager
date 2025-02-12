@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 
-	"github.com/Azpect3120/TCPNotificationManager/internal/client"
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
 
@@ -26,6 +25,9 @@ type ServerOpts struct {
 
 	// Use TLS to secure the connection
 	TLS bool
+
+	// Size of the message buffer in bytes
+	MsgBufSize int
 }
 
 // Provide an address for the server to bind to.
@@ -56,14 +58,22 @@ func WithMaxConn(maxConn int) ServerOptsFunc {
 	}
 }
 
+// Provide a message buffer size for the server.
+func WithMsgBufSize(msgBufSize int) ServerOptsFunc {
+	return func(opts *ServerOpts) {
+		opts.MsgBufSize = msgBufSize
+	}
+}
+
 // Defines the default server options, if they are not
 // provided by the user.
 func defaultServerOpts() ServerOpts {
 	return ServerOpts{
-		Addr:    "127.0.0.1",
-		Port:    8080,
-		TLS:     false,
-		MaxConn: 10,
+		Addr:       "127.0.0.1",
+		Port:       8080,
+		TLS:        false,
+		MaxConn:    10,
+		MsgBufSize: 1024,
 	}
 }
 
@@ -81,9 +91,27 @@ type TcpServer struct {
 	// ID of the server.
 	ID string
 
-	// Connections to the server. The key is the client ID,
-	// and the value is the client itself.
-	Conns map[string]client.TcpClient
+	// Connections to the server. A slice of connections. This
+	// slice should not be used for authentication, but for
+	// simply holding the connections (both authenticated and
+	// unauthenticated).
+	//
+	// When the length of this slice becomes equal to the max
+	// connections limit defined in the server options, the
+	// server will no longer accept connections.
+	Conns []net.Conn
+
+	// A list of authorized clients. The client ID is the key,
+	// and the client's connection is the value. This is used to
+	// verify that the client ID is being used by the correct
+	// client. This is a simple way to verify the client's
+	// identity.
+	//
+	// This map will be used to determine which clients to publish
+	// messages to. If the client is not in this map, but is in the
+	// Conns slice, the server will not publish messages to that
+	// connection.
+	Authorized map[string]net.Conn
 
 	// Store any errors that occur during the server's lifecycle.
 	Errors []error
@@ -106,11 +134,13 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 		optFn(&server.Opts)
 	}
 
-	// Create the connections map here using the max connection limit.
-	// This could be done in the instantiation of the server, but it is
+	// Create the connections slice here using the max connection limit.
+	// This could be done in the instantiating of the server, but it is
 	// done here to show that the server is created with a max connection
 	// limit.
-	server.Conns = make(map[string]client.TcpClient, server.Opts.MaxConn)
+	server.Conns = make([]net.Conn, 0, server.Opts.MaxConn)
+
+	server.Authorized = make(map[string]net.Conn)
 
 	return server
 }
@@ -173,4 +203,32 @@ func (s *TcpServer) Listen() net.Listener {
 		s.Errors = append(s.Errors, err)
 	}
 	return ln
+}
+
+// Add a connection to the server. This function does not authenticate the
+// client, but it does allow the server to track the connection. If the server
+// is at the max connection limit, the server will return an error.
+func (s *TcpServer) addConnection(conn net.Conn) error {
+	// At max size, return an error. The error will be used to send back a connection_rejected
+	// message to the client.
+	if len(s.Conns) > s.Opts.MaxConn {
+		return fmt.Errorf("Max connection limit reached")
+	}
+
+	s.Conns = append(s.Conns, conn)
+	return nil
+}
+
+// Remove a connection from the server. This function should be called when the
+// connection closes.
+//
+// It will also remove the connection from the authorized map
+// once the map is implemented.
+func (s *TcpServer) removeConnection(conn net.Conn) {
+	for i, c := range s.Conns {
+		if c == conn {
+			s.Conns = append(s.Conns[:i], s.Conns[i+1:]...)
+			break
+		}
+	}
 }

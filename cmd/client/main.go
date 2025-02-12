@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/client"
@@ -10,7 +9,6 @@ import (
 func main() {
 	c := client.NewTCPClient(client.WithPort(3000), client.WithTLS())
 	conn := c.Configure("./certs/client.crt", "./certs/client.key", "localhost").Connect()
-	fmt.Printf("Client: %v\n", c)
 	defer conn.Close()
 
 	for _, err := range c.Errors {
@@ -18,7 +16,7 @@ func main() {
 	}
 
 	// Simple loop to send a message to the server every 500ms
-	for {
+	for i := 0; i < 10; i++ {
 		conn.Write([]byte("Hello, World!\n"))
 		time.Sleep(500 * time.Millisecond)
 	}
