@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/client"
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
@@ -118,8 +119,17 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 // The server is returned to allow for method chaining.
 //
 // Errors will not be handled here, they will be stored in the server's
-// errors slice.
+// errors slice. If the files do not exist, or cannot be read, an error
+// will be stored in the server's errors slice.
 func (s *TcpServer) Configure(certPath, keyPath string) *TcpServer {
+	// Ensure the files exist
+	if _, err := os.OpenFile(certPath, os.O_RDONLY, 0644); err != nil {
+		s.Errors = append(s.Errors, err)
+	}
+	if _, err := os.OpenFile(keyPath, os.O_RDONLY, 0644); err != nil {
+		s.Errors = append(s.Errors, err)
+	}
+
 	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
 		s.Errors = append(s.Errors, err)
