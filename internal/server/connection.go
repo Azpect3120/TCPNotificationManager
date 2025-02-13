@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/Azpect3120/TCPNotificationManager/internal/events"
 )
 
 // Handle a connection from a client. This method is defined on the
@@ -49,9 +51,27 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 			return
 		}
 
+		// This is where the messages should be parsed and processed.
 		if n > 0 {
-			// This is where the messages should be parsed and processed.
-			fmt.Printf("Read: %s", buf[:n])
+			event, err := events.Parser(buf[:n])
+			if err != nil {
+				// Not sure why or when this would happen
+				fmt.Printf("Error parsing message: %v\n", err)
+			}
+
+			// Handle the event. A check for authorization should be done
+			// in the handlers for the events, because there is no way to
+			// get data from the raw interface{} type until it has been
+			// type asserted.
+			//
+			// This works by using reflection to get the name of the event
+			switch e := event.(type) {
+			case *events.RequestAuthenticationEvent:
+			case *events.ConnectionAcceptedEvent:
+			case *events.ConnectionRejectedEvent:
+			default:
+				fmt.Printf("Unknown event type: %v\n", e)
+			}
 		}
 	}
 }

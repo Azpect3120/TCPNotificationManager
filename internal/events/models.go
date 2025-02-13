@@ -38,3 +38,17 @@ type ConnectionRejectedEvent struct {
 	BaseEvent
 	Content ConnectionRejectedContent `json:"content"`
 }
+
+// Stores the content that should be inside the event.
+//
+// For now, this is to be ignored.
+type RequestAuthenticationContent struct {
+	Token string `json:"token"`
+}
+
+// Event sent by the client to the server when the connection
+// is established.
+type RequestAuthenticationEvent struct {
+	BaseEvent
+	Content RequestAuthenticationContent `json:"content"`
+}

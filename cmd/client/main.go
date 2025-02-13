@@ -1,9 +1,10 @@
 package main
 
 import (
-	"time"
+	"encoding/json"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/client"
+	"github.com/Azpect3120/TCPNotificationManager/internal/events"
 )
 
 func main() {
@@ -15,9 +16,10 @@ func main() {
 		panic(err)
 	}
 
-	// Simple loop to send a message to the server every 500ms
-	for i := 0; i < 10; i++ {
-		conn.Write([]byte("Hello, World!\n"))
-		time.Sleep(500 * time.Millisecond)
+	msg, err := json.Marshal(events.NewRequestAuthenticationEvent(""))
+	if err != nil {
+		panic(err)
 	}
+
+	conn.Write(msg)
 }

@@ -77,6 +77,14 @@ func defaultServerOpts() ServerOpts {
 	}
 }
 
+// EventHandler is a function type that is used to handle events
+// that are received by the server. This is built using a generic
+// to accept any type of event.
+//
+// This type will define the function signature for the event
+// handlers that are used by the server.
+type EventHandler[T any] func(net.Conn, *T)
+
 // TcpServer is a struct that represents a TCP server.
 // Server options are abstracted away from the user in a
 // way that they can be provided as arguments to the NewTCPServer
@@ -118,6 +126,27 @@ type TcpServer struct {
 
 	// TLS configuration for the server.
 	TLSConfig *tls.Config
+
+	// EventHandlers is a map of event types to their handlers. This map
+	// will be used to determine which function to call when an event is
+	// received by the server.
+	//
+	// The key is the event name, and the value is the function to call.
+	// The function is defined here as an interface{} but it should be
+	// defined as the EventHandler type.
+	EventHandlers map[string]interface{}
+}
+
+// RegisterEventHandler registers an event handler for a specific event type.
+// Methods cannot have generic types, so this function will be used to register
+// the event handlers for the server.
+//
+// The event name should match the class of event that is being handled, not the
+// name of the event stored in the struct. This is because we use reflection to
+// determine which handler to call.
+func RegisterEventHandler[T any](server *TcpServer, eventName string, handler EventHandler[T]) {
+	server.EventHandlers[eventName] = handler
+
 }
 
 // Create a new TCP server with the provided options. If options
@@ -139,8 +168,11 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	// done here to show that the server is created with a max connection
 	// limit.
 	server.Conns = make([]net.Conn, 0, server.Opts.MaxConn)
-
 	server.Authorized = make(map[string]net.Conn)
+
+	// Initialize the event handlers map
+	server.EventHandlers = make(map[string]interface{})
+	RegisterEventHandler(server, "RequestAuthenticationEvent", RequestAuthenticationHandler)
 
 	return server
 }

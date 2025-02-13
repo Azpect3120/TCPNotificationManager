@@ -16,13 +16,13 @@ All events will have a standard structure. Events will also contain specific dat
 
 ```json
 {
-    "event": "event_name",
-    "id": "sender_id",
+    "event": "[event_name]",
+    "id": "[sender_id]",
     "content": {
-        "key": "value",
+        "[key]": "[value]",
         ...
     },
-    "timestamp": "timestamp"
+    "timestamp": "[timestamp]"
 }
 ```
 
@@ -39,11 +39,11 @@ the ID provided.
 ```json
 {
     "event": "connection_accepted",
-    "id": "server_id",
+    "id": "[server_id]",
     "content": {
-        "client_id": "client_id",
+        "client_id": "[client_id]",
     },
-    "timestamp": "timestamp"
+    "timestamp": "[timestamp]"
 }
 ```
 
@@ -59,16 +59,43 @@ a status code to identify the error.
 ```json
 {
     "event": "connection_refused",
-    "id": "server_id",
+    "id": "[server_id]",
     "content": {
-        "code": "code",
-        "reason": "reason",
+        "code": "[code]",
+        "reason": "[reason]",
     },
-    "timestamp": "timestamp"
+    "timestamp": "[timestamp]"
 }
 ```
 
 For details on the status codes and reasons, see the [Error Codes](error_codes.md) page.
 
 
-## Client Send Events
+## Client Sent Events
+
+### Request Authentication
+
+This event is sent by a client when they first connect and need to authenticate with the server.
+Nothing can be published or subscribed to until the client has been authenticated, so this event
+is critical to the lifecycle of the client.
+
+This request will contain basically nothing, just the event name. This is because in order to connect
+to the TCP server to begin with, the keys and certificates must be provided. The server will use these
+to assume the client is authenticated. 
+
+The ID field will contain nothing for this event because the server generates the ID for the client,
+however due to the inherent nature of the event, the ID field is required. The content field will 
+contain a token that the client must provide to authenticate.
+
+**TODO:** Implement tokens for this event to add another layer of security. For now, token can be ignored.
+
+```json
+{
+    "event": "request_authentication",
+    "id": "__",
+    "content": {
+        "token": "[token]"
+    },
+    "timestamp": "[timestamp]"
+}
+```
