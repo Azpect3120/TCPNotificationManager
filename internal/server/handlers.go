@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
 
@@ -26,7 +27,7 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 	}
 	if !exists {
 		// Send back a rejected message
-		fmt.Printf("Client not found in server connections: %s\n", conn.RemoteAddr().String())
+		server.Logger.Log(fmt.Sprintf("Client not found in server connections: %s\n", conn.RemoteAddr().String()), logger.ERROR)
 		return
 	}
 
@@ -36,11 +37,11 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 
 	// Display a message for now, but in the future, this can be an event
 	// to all other client, that a new client has been accepted.
-	fmt.Printf("A client '%s' has been authenticated\n", clientId)
+	server.Logger.Log(fmt.Sprintf("A client '%s' has been authenticated\n", clientId))
 
 	// Send back the message to the client
 	if bytes, err := json.Marshal(events.NewConnectionAcceptedEvent(server.ID, clientId)); err != nil {
-		fmt.Printf("Error marshalling response: %s\n", err)
+		server.Logger.Log(fmt.Sprintf("Error marshalling response: %s\n", err), logger.ERROR)
 	} else {
 		conn.Write(bytes)
 	}
@@ -48,11 +49,11 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 	// Client has been authenticated, now we can broadcast the message to all clients
 	message, err := json.Marshal(events.NewClientAuthenticatedEvent(server.ID, clientId))
 	if err != nil {
-		fmt.Printf("Error marshalling response: %s\n", err)
+		server.Logger.Log(fmt.Sprintf("Error marshalling response: %s\n", err), logger.ERROR)
 	} else {
 		errs := server.BroadcastMessage(message, conn)
 		for _, err := range errs {
-			fmt.Printf("Error broadcasting message: %s\n", err)
+			server.Logger.Log(fmt.Sprintf("Error broadcasting message: %s\n", err), logger.ERROR)
 		}
 	}
 }

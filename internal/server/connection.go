@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 )
 
 // Handle a connection from a client. This method is defined on the
@@ -25,7 +26,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 	// Defer the closing of the connection until the function returns.
 	defer func() {
 		conn.Close()
-		fmt.Printf("Connection lost: %s\n", conn.RemoteAddr().String())
+		s.Logger.Log(fmt.Sprintf("Connection lost: %s\n", conn.RemoteAddr().String()))
 		s.removeConnection(conn)
 	}()
 
@@ -40,9 +41,8 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 		return
 	}
 
-	// Print a connection log in the server, this is not to be broadcast to
-	// the clients.
-	fmt.Printf("Connection accepted: %s\n", conn.RemoteAddr().String())
+	// Print a connection log in the server, this is not to be broadcast to the clients.
+	s.Logger.Log(fmt.Sprintf("Connection accepted: %s\n", conn.RemoteAddr().String()))
 
 	// Create a buffer to read the messages from the clients. The size
 	// of the buffer is defined in the server's options. Default is 1KB.
@@ -54,7 +54,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 			return
 		} else if err != nil {
 			// Else, a real error occurred
-			fmt.Printf("Error reading from connection: %v\n", err)
+			s.Logger.Log(fmt.Sprintf("Error reading from connection: %v\n", err), logger.ERROR)
 			return
 		}
 
@@ -63,7 +63,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 			event, err := events.Parser(buf[:n])
 			if err != nil {
 				// Not sure why or when this would happen
-				fmt.Printf("Error parsing message: %v\n", err)
+				s.Logger.Log(fmt.Sprintf("Error parsing message: %v\n", err), logger.ERROR)
 			}
 
 			// Handle the event. A check for authorization should be done
@@ -84,10 +84,10 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 				if handlerType.NumIn() == 3 && handlerType.In(2) == reflect.PointerTo(reflect.TypeOf(event).Elem()) {
 					reflect.ValueOf(handler).Call([]reflect.Value{reflect.ValueOf(s), reflect.ValueOf(conn), reflect.ValueOf(event)})
 				} else {
-					fmt.Println("Handler type mismatch for", eventName)
+					s.Logger.Log(fmt.Sprintln("Handler type mismatch for", eventName), logger.ERROR)
 				}
 			} else {
-				fmt.Println("No handler found for", eventName)
+				s.Logger.Log(fmt.Sprintln("No handler found for", eventName), logger.ERROR)
 			}
 		}
 	}
