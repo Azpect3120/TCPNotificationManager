@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
 
@@ -136,6 +137,9 @@ type TcpServer struct {
 	// The function is defined here as an interface{} but it should be
 	// defined as the EventHandler type.
 	EventHandlers map[string]interface{}
+
+	// Logger for the server, the default option will be info level.
+	Logger *logger.Logger
 }
 
 // RegisterEventHandler registers an event handler for a specific event type.
@@ -154,8 +158,9 @@ func RegisterEventHandler[T any](server *TcpServer, eventName string, handler Ev
 // be found in the defaultServerOpts function.
 func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	server := &TcpServer{
-		Opts: defaultServerOpts(),
-		ID:   utils.GenerateServerID(),
+		Opts:   defaultServerOpts(),
+		ID:     utils.GenerateServerID(),
+		Logger: logger.NewLogger(logger.WithDefaultLevel(logger.INFO), logger.WithTimestamp()),
 	}
 
 	// Apply the options to the server.
