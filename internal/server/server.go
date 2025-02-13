@@ -242,7 +242,7 @@ func (s *TcpServer) Listen() net.Listener {
 func (s *TcpServer) addConnection(conn net.Conn) error {
 	// At max size, return an error. The error will be used to send back a connection_rejected
 	// message to the client.
-	if len(s.Conns) > s.Opts.MaxConn {
+	if len(s.Conns) >= s.Opts.MaxConn {
 		return fmt.Errorf("Max connection limit reached")
 	}
 
