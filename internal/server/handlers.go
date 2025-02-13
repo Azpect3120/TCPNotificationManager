@@ -37,16 +37,22 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 	// Display a message for now, but in the future, this can be an event
 	// to all other client, that a new client has been accepted.
 	fmt.Printf("A client '%s' has been authenticated\n", clientId)
-	for _, c := range server.Conns {
-		fmt.Printf("Client: %s\n", c.RemoteAddr().String())
-	}
-	fmt.Printf("%+v\n", server.Authorized)
 
 	// Send back the message to the client
-	response := events.NewConnectionAcceptedEvent(server.ID, clientId)
-	if bytes, err := json.Marshal(response); err != nil {
+	if bytes, err := json.Marshal(events.NewConnectionAcceptedEvent(server.ID, clientId)); err != nil {
 		fmt.Printf("Error marshalling response: %s\n", err)
 	} else {
 		conn.Write(bytes)
+	}
+
+	// Client has been authenticated, now we can broadcast the message to all clients
+	message, err := json.Marshal(events.NewClientAuthenticatedEvent(server.ID, clientId))
+	if err != nil {
+		fmt.Printf("Error marshalling response: %s\n", err)
+	} else {
+		errs := server.BroadcastMessage(message, conn)
+		for _, err := range errs {
+			fmt.Printf("Error broadcasting message: %s\n", err)
+		}
 	}
 }

@@ -52,3 +52,15 @@ type RequestAuthenticationEvent struct {
 	BaseEvent
 	Content RequestAuthenticationContent `json:"content"`
 }
+
+// Stores the content that should be inside the event.
+type ClientAuthenticatedContent struct {
+	ClientID string `json:"client_id"`
+}
+
+// Event sent by the server to the client when a new client
+// authenticates with the server.
+type ClientAuthenticatedEvent struct {
+	BaseEvent
+	Content ClientAuthenticatedContent `json:"content"`
+}

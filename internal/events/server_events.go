@@ -38,3 +38,21 @@ func NewConnectionRejectedEvent(serverID string, code int, reason string) Connec
 		},
 	}
 }
+
+// Create and return a new ClientAuthenticatedEvent. This function does not
+// generate any details, instead it requires all details as arguments. Which
+// should be generated elsewhere.
+//
+// All timestamps will be sent back in UTC format.
+func NewClientAuthenticatedEvent(serverID, clientID string) ClientAuthenticatedEvent {
+	return ClientAuthenticatedEvent{
+		BaseEvent: BaseEvent{
+			Event:     "client_authenticated",
+			ID:        serverID,
+			Timestamp: time.Now().UTC(),
+		},
+		Content: ClientAuthenticatedContent{
+			ClientID: clientID,
+		},
+	}
+}

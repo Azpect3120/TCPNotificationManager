@@ -40,6 +40,8 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 		return
 	}
 
+	// Print a connection log in the server, this is not to be broadcast to
+	// the clients.
 	fmt.Printf("Connection accepted: %s\n", conn.RemoteAddr().String())
 
 	// Create a buffer to read the messages from the clients. The size

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
@@ -262,4 +263,48 @@ func (s *TcpServer) removeConnection(conn net.Conn) {
 			break
 		}
 	}
+}
+
+// BroadcastMessage sends a message to all clients connected to the server.
+// This function will be used to send messages to all clients that are authenticated,
+// those that are not authenticated will not receive the message.
+//
+// The message should be built before this function is called, typically a JSON
+// marshalled byte slice.
+//
+// This function has an O(n^2) time complexity, which is not ideal, but it is to
+// ensure safety and security. This function will loop over the authorized map
+// and then loop over the connections slice to ensure the client is still connected.
+//
+// However, to optimize this function, go routines have been used to send the messages
+// all at the same time. A mutex must be used for the errs slice to prevent race
+// conditions.
+//
+// A slice of errors will be returned to the caller. If there are no errors, the slice
+// will be empty. Otherwise, the slice will contain all errors that occurred during
+// the broadcast, which will only be errors that occurred while sending the message.
+//
+// The ignore parameter is used to ignore a connection from the broadcast. This is useful
+// when a client sends a message and does not want to receive the message back.
+func (s *TcpServer) BroadcastMessage(message []byte, ignore ...net.Conn) []error {
+	var errs []error
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	for _, conn := range s.Authorized {
+		wg.Add(1)
+		go func(conn net.Conn) {
+			defer wg.Done()
+			if utils.Contains(s.Conns, conn) && !utils.Contains(ignore, conn) {
+				if _, err := conn.Write(message); err != nil {
+					mu.Lock()
+					errs = append(errs, err)
+					mu.Unlock()
+				}
+			}
+		}(conn)
+	}
+
+	wg.Wait()
+	return errs
 }

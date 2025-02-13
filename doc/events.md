@@ -70,6 +70,29 @@ a status code to identify the error.
 
 For details on the status codes and reasons, see the [Error Codes](error_codes.md) page.
 
+### Client Authenticated
+
+When a client authenticates with the server, the server will send a `client_authenticated` event to all other 
+clients connected to the server. This event will contain the ID of the client that connected. Like all other 
+messages, only authenticated clients will receive this message.
+
+Originally, this was a client connected event, but it was changed to authenticated because the client is not
+truly connected until they have authenticated. Plus, until the client is authenticated, the server knows nothing
+about the client, other than the fact that they are trying to connect.
+
+This message will not be sent back to the same client that authenticated, that would be silly.
+
+```json
+{
+    "event": "client_authenticated",
+    "id": "[server_id]",
+    "content": {
+        "client_id": "[client_id]",
+    },
+    "timestamp": "[timestamp]"
+}
+```
+
 
 ## Client Sent Events
 
