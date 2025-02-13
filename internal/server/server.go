@@ -83,7 +83,7 @@ func defaultServerOpts() ServerOpts {
 //
 // This type will define the function signature for the event
 // handlers that are used by the server.
-type EventHandler[T any] func(net.Conn, *T)
+type EventHandler[T any] func(*TcpServer, net.Conn, *T)
 
 // TcpServer is a struct that represents a TCP server.
 // Server options are abstracted away from the user in a
@@ -146,7 +146,6 @@ type TcpServer struct {
 // determine which handler to call.
 func RegisterEventHandler[T any](server *TcpServer, eventName string, handler EventHandler[T]) {
 	server.EventHandlers[eventName] = handler
-
 }
 
 // Create a new TCP server with the provided options. If options

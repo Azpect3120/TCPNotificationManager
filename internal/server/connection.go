@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"reflect"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
 )
@@ -63,14 +64,24 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 			// in the handlers for the events, because there is no way to
 			// get data from the raw interface{} type until it has been
 			// type asserted.
-			//
-			// This works by using reflection to get the name of the event
-			switch e := event.(type) {
-			case *events.RequestAuthenticationEvent:
-			case *events.ConnectionAcceptedEvent:
-			case *events.ConnectionRejectedEvent:
-			default:
-				fmt.Printf("Unknown event type: %v\n", e)
+			eventType := reflect.TypeOf(event).Elem()
+			eventName := eventType.Name()
+
+			if handler, ok := s.EventHandlers[eventName]; ok {
+				// Correctly assert the handler type
+				handlerType := reflect.TypeOf(handler)
+
+				// Check if the handler type matches the event type. This
+				// shit is black magic, Gemini created it for me, it seems
+				// make sense but definitely not something I could have done
+				// on my own.
+				if handlerType.NumIn() == 3 && handlerType.In(2) == reflect.PointerTo(reflect.TypeOf(event).Elem()) {
+					reflect.ValueOf(handler).Call([]reflect.Value{reflect.ValueOf(s), reflect.ValueOf(conn), reflect.ValueOf(event)})
+				} else {
+					fmt.Println("Handler type mismatch for", eventName)
+				}
+			} else {
+				fmt.Println("No handler found for", eventName)
 			}
 		}
 	}
