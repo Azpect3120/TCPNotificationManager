@@ -11,6 +11,9 @@ func main() {
 	ln := s.Configure("./certs/server.crt", "./certs/server.key").Listen()
 	defer ln.Close()
 
+	// Start listening
+	s.Logger.Log(fmt.Sprintf("Server started on %s:%d\n", s.Opts.Addr, s.Opts.Port))
+
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -19,6 +22,5 @@ func main() {
 		defer conn.Close()
 
 		go s.HandleConnection(conn)
-
 	}
 }
