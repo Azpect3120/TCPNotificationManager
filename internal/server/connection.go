@@ -35,8 +35,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 	// track the connection.
 	if err := s.addConnection(conn); err != nil {
 		// Send back a rejection message
-		response := events.NewConnectionRejectedEvent(s.ID, 504, "Server Full: Server is at its max capacity")
-		bytes, _ := json.Marshal(response)
+		bytes, _ := json.Marshal(events.NewConnectionRejectedEvent(s.ID, 504, "Server Full: Server is at its max capacity"))
 		conn.Write(bytes)
 		return
 	}
@@ -60,6 +59,9 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 
 		// This is where the messages should be parsed and processed.
 		if n > 0 {
+			// Displaying the message received from the client
+			s.Logger.Log(fmt.Sprintf("%s\n", string(buf[:n])))
+
 			event, err := events.Parser(buf[:n])
 			if err != nil {
 				// Not sure why or when this would happen
