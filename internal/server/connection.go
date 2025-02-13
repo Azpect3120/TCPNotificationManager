@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -32,7 +33,10 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 	// does not authenticate the client, but it does allow the server to
 	// track the connection.
 	if err := s.addConnection(conn); err != nil {
-		fmt.Printf("Error adding connection: %s\n", err)
+		// Send back a rejection message
+		response := events.NewConnectionRejectedEvent(s.ID, 504, "Server Full: Server is at its max capacity")
+		bytes, _ := json.Marshal(response)
+		conn.Write(bytes)
 		return
 	}
 
