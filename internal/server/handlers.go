@@ -57,3 +57,28 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 		}
 	}
 }
+
+// When a client disconnects from the server, this function will be called on
+// the server. This function will handle the disconnection and remove the client
+// from the authenticated map. Additionally, the server will broadcast the
+// disconnection event to all other clients.
+//
+// Each client is removed from the server's connections slice when they disconnect,
+// so there is no need to remove them here.
+func ClientDisconnectingHandler(server *TcpServer, conn net.Conn, event *events.ClientDisconnectingEvent) {
+	// Delete from the authorized map
+	delete(server.Authorized, event.ID)
+
+	server.Logger.Log(fmt.Sprintf("Client '%s' has disconnected\n", event.ID), logger.DEBUG)
+
+	// TODO: Broadcast the message to all clients
+	message, err := json.Marshal(events.NewClientDisconnectedEvent(server.ID, event.ID))
+	if err != nil {
+		server.Logger.Log(fmt.Sprintf("Error marshalling response: %s\n", err), logger.ERROR)
+	} else {
+		errs := server.BroadcastMessage(message, conn)
+		for _, err := range errs {
+			server.Logger.Log(fmt.Sprintf("Error broadcasting message: %s\n", err), logger.ERROR)
+		}
+	}
+}

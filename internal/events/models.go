@@ -75,3 +75,15 @@ type ClientDisconnectingEvent struct {
 	BaseEvent
 	Content EmptyContent `json:"content"`
 }
+
+// Stores the content that should be inside the event.
+type ClientDisconnectedContent struct {
+	ClientID string `json:"client_id"`
+}
+
+// Event sent by the server to the client when a client
+// disconnects from the server.
+type ClientDisconnectedEvent struct {
+	BaseEvent
+	Content ClientDisconnectedContent `json:"content"`
+}

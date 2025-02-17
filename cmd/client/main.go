@@ -5,6 +5,9 @@ import (
 	"errors"
 	"io"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/client"
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
@@ -13,7 +16,19 @@ import (
 func main() {
 	c := client.NewTCPClient(client.WithPort(3000), client.WithTLS())
 	conn := c.Configure("./certs/client.crt", "./certs/client.key", "localhost").Connect()
-	defer conn.Close()
+
+	// Graceful shutdown handling, capture SIGINT and SIGTERM
+	// Capture Ctrl+C (SIGINT) and other termination requests (SIGTERM)
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigchan
+		// Instead of using defer, this logic works the same way, for
+		// testing.
+		// TODO: Likely needs to change in production.
+		c.Disconnect(conn)
+		os.Exit(0)
+	}()
 
 	for _, err := range c.Errors {
 		panic(err)

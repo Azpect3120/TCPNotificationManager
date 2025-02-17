@@ -56,3 +56,21 @@ func NewClientAuthenticatedEvent(serverID, clientID string) ClientAuthenticatedE
 		},
 	}
 }
+
+// Create and return a new ClientDisconnectedEvent. This function does not
+// generate any details, instead it requires all details as arguments. Which
+// should be generated elsewhere.
+//
+// All timestamps will be sent back in UTC format.
+func NewClientDisconnectedEvent(serverID, clientID string) ClientDisconnectedEvent {
+	return ClientDisconnectedEvent{
+		BaseEvent: BaseEvent{
+			Event:     "client_disconnected",
+			ID:        serverID,
+			Timestamp: time.Now().UTC(),
+		},
+		Content: ClientDisconnectedContent{
+			ClientID: clientID,
+		},
+	}
+}

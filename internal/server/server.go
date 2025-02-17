@@ -183,6 +183,7 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	// The 3rd parameter (handler) is the function that will be called when the event
 	// is received by the server.
 	RegisterEventHandler(server, "RequestAuthenticationEvent", RequestAuthenticationHandler)
+	RegisterEventHandler(server, "ClientDisconnectingEvent", ClientDisconnectingHandler)
 
 	return server
 }
@@ -262,10 +263,9 @@ func (s *TcpServer) addConnection(conn net.Conn) error {
 }
 
 // Remove a connection from the server. This function should be called when the
-// connection closes.
-//
-// It will also remove the connection from the authorized map
-// once the map is implemented.
+// connection closes. This function will only remove the connection from the
+// server's connection slice. It will not remove the connection from the authorized
+// map. This is because clients can be connected that aren't authorized.
 func (s *TcpServer) removeConnection(conn net.Conn) {
 	for i, c := range s.Conns {
 		if c == conn {

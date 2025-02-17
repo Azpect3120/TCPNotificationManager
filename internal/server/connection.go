@@ -64,8 +64,9 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 
 			event, err := events.Parser(buf[:n])
 			if err != nil {
-				// Not sure why or when this would happen
+				// This happens when an event that is not implemented is received.
 				s.Logger.Log(fmt.Sprintf("Error parsing message: %v\n", err), logger.ERROR)
+				return
 			}
 
 			// Handle the event. A check for authorization should be done

@@ -93,6 +93,27 @@ This message will not be sent back to the same client that authenticated, that w
 }
 ```
 
+### Client Disconnected
+
+When a client disconnects from the server, the server will send a `client_disconnected` event to all other clients
+connected to the server. This event will contain the ID of the client that disconnected. The server will only send
+this event when a client that was **authenticated** disconnects. If a client that was not authenticated disconnects,
+the server will not send this event, however, it will still log the disconnection.
+
+Similar to the `client_authenticated` event, this event will not be sent back to the client that disconnected. For
+two reasons: 1) it would be stupid, 2) the client is disconnected, so they can't receive the message anyway.
+
+```json
+{
+    "event": "client_disconnected",
+    "id": "[server_id]",
+    "content": {
+        "client_id": "[client_id]",
+    },
+    "timestamp": "[timestamp]"
+}
+```
+
 
 ## Client Sent Events
 

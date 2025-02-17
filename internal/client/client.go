@@ -2,9 +2,11 @@ package client
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net"
 
+	"github.com/Azpect3120/TCPNotificationManager/internal/events"
 	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 )
 
@@ -194,4 +196,23 @@ func (c *TcpClient) Connect() net.Conn {
 		c.Errors = append(c.Errors, err)
 	}
 	return conn
+}
+
+// This function is used to close the connection to the server.
+// It handles closing the connection, as well as sending the final
+// disconnection event to the server.
+//
+// Like all methods on the TcpClient struct, errors are added to the
+// client's error slice.
+func (c *TcpClient) Disconnect(conn net.Conn) {
+	defer conn.Close()
+
+	bytes, err := json.Marshal(events.NewClientDisconnectingEvent(c.ID))
+	if err != nil {
+		c.Errors = append(c.Errors, err)
+		c.Logger.Log(fmt.Sprintf("Error marshaling disconnect event: %v", err), logger.ERROR) // Log the error!
+		return                                                                                // Important: Return early if marshaling fails!
+	}
+	c.Logger.Log(fmt.Sprintf("Disconnecting from server: %s\n", c.ID), logger.DEBUG)
+	conn.Write(bytes)
 }
