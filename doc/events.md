@@ -122,3 +122,18 @@ contain a token that the client must provide to authenticate.
     "timestamp": "[timestamp]"
 }
 ```
+
+### Disconnecting
+
+When a client wants to disconnect from the server, they will send a `disconnecting` event to the server.
+This event will contain the ID of the client that is disconnecting. The server will then remove the client
+from the list of connected clients and send a `client_disconnected` event to all other clients.
+
+```json
+{
+    "event": "disconnecting",
+    "id": "[client_id]",
+    "content": {},
+    "timestamp": "[timestamp]"
+}
+```

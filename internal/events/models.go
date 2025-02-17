@@ -14,6 +14,10 @@ type BaseEvent struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
+// Empty content structure which is used when an event does
+// not require any content.
+type EmptyContent struct{}
+
 // Stores the content that should be inside the event.
 type ConnectionAcceptedContent struct {
 	ClientID string `json:"client_id"`
@@ -63,4 +67,11 @@ type ClientAuthenticatedContent struct {
 type ClientAuthenticatedEvent struct {
 	BaseEvent
 	Content ClientAuthenticatedContent `json:"content"`
+}
+
+// Event sent by the client to the server when a client is
+// disconnecting.
+type ClientDisconnectingEvent struct {
+	BaseEvent
+	Content EmptyContent `json:"content"`
 }
