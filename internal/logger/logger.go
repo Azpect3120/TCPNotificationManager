@@ -93,6 +93,10 @@ func NewLogger(opts ...LoggerOptsFunc) *Logger {
 // 0 or more LogLevel arguments. Only the first argument
 // will be used, if it exists. If any more arguments are
 // provided, they will be ignored.
+//
+// A new line character will not be added to the end of the
+// message by default. If a new line is desired, it must be
+// included in the message.
 func (l *Logger) Log(message string, level ...LogLevel) {
 	var logLevel LogLevel
 	if len(level) > 0 {

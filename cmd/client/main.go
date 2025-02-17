@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 
@@ -32,12 +31,14 @@ func main() {
 	for {
 		n, err := conn.Read(buf)
 		if errors.Is(err, net.ErrClosed) || errors.Is(err, io.EOF) {
+			// Connection closed, can exit safely
 			return
 		} else if err != nil {
+			// Other error, for now, panic
 			panic(err)
 		}
 		if n > 0 {
-			fmt.Printf("Received: %s\n", string(buf[:n]))
+			c.HandleMessage(buf[:n])
 		}
 	}
 }

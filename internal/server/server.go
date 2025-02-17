@@ -177,6 +177,11 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 
 	// Initialize the event handlers map
 	server.EventHandlers = make(map[string]interface{})
+
+	// When registering new events, make sure the event name matches the class name
+	// of the event. They must be a perfect match or the event will not be handled.
+	// The 3rd parameter (handler) is the function that will be called when the event
+	// is received by the server.
 	RegisterEventHandler(server, "RequestAuthenticationEvent", RequestAuthenticationHandler)
 
 	return server

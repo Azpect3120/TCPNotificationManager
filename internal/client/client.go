@@ -54,6 +54,14 @@ func defaultClientOpts() ClientOpts {
 	}
 }
 
+// EventHandler is a function type that is used to handle events
+// that are received by the server. This is built using a generic
+// to accept any type of event.
+//
+// This type will define the function signature for the event
+// handlers that are used by the server.
+type EventHandler[T any] func(*TcpClient, *T)
+
 // TcpClient is a struct that represents a TCP client.
 // Client options are abstracted away from the user in a
 // way that they can be provided as arguments to the NewTCPClient
@@ -74,8 +82,28 @@ type TcpClient struct {
 	// TLS configuration for the client.
 	TLSConfig *tls.Config
 
+	// EventHandlers is a map of event types to their handlers. This map
+	// will be used to determine which function to call when an event is
+	// received by the client.
+	//
+	// The key is the event name, and the value is the function to call.
+	// The function is defined here as an interface{} but it should be
+	// defined as the EventHandler type.
+	EventHandlers map[string]interface{}
+
 	// Logger for the client, the default option will be info level.
 	Logger *logger.Logger
+}
+
+// RegisterEventHandler registers an event handler for a specific event type.
+// Methods cannot have generic types, so this function will be used to register
+// the event handlers for the client.
+//
+// The event name should match the class of event that is being handled, not the
+// name of the event stored in the struct. This is because we use reflection to
+// determine which handler to call.
+func RegisterEventHandler[T any](client *TcpClient, eventName string, handler EventHandler[T]) {
+	client.EventHandlers[eventName] = handler
 }
 
 // Create a new TCP client with the provided options. If options
@@ -92,6 +120,16 @@ func NewTCPClient(opts ...ClientOptsFunc) *TcpClient {
 	for _, optFn := range opts {
 		optFn(&client.Opts)
 	}
+
+	// Initialize the event handlers map
+	client.EventHandlers = make(map[string]interface{})
+
+	// When registering new events, make sure the event name matches the class name
+	// of the event. They must be a perfect match or the event will not be handled.
+	// The 3rd parameter (handler) is the function that will be called when the event
+	// is received by the client.
+	RegisterEventHandler(client, "ConnectionAcceptedEvent", ConnectionAcceptedHandler)
+	RegisterEventHandler(client, "ClientAuthenticatedEvent", ClientAuthenticatedHandler)
 
 	return client
 }

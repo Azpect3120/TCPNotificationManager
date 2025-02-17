@@ -28,6 +28,8 @@ func _eventType(data []byte) (interface{}, error) {
 		event = &ConnectionRejectedEvent{}
 	case "request_authentication":
 		event = &RequestAuthenticationEvent{}
+	case "client_authenticated":
+		event = &ClientAuthenticatedEvent{}
 	default:
 		return nil, fmt.Errorf("Event type '%s' has not been implemented.", eventType.Event)
 	}
