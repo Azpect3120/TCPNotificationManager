@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 )
 
 // Function symbol used to configure the client
@@ -71,6 +73,9 @@ type TcpClient struct {
 
 	// TLS configuration for the client.
 	TLSConfig *tls.Config
+
+	// Logger for the client, the default option will be info level.
+	Logger *logger.Logger
 }
 
 // Create a new TCP client with the provided options. If options
@@ -78,8 +83,9 @@ type TcpClient struct {
 // be found in the defaultClientOpts function.
 func NewTCPClient(opts ...ClientOptsFunc) *TcpClient {
 	client := &TcpClient{
-		Opts: defaultClientOpts(),
-		ID:   "",
+		Opts:   defaultClientOpts(),
+		ID:     "",
+		Logger: logger.NewLogger(logger.WithDefaultLevel(logger.INFO), logger.WithTimestamp()),
 	}
 
 	// Apply the options to the client.
