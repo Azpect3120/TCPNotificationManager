@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 	"github.com/Azpect3120/TCPNotificationManager/internal/server"
 )
 
@@ -17,7 +18,8 @@ func main() {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection: ", err)
+			s.Logger.Log(fmt.Sprintf("Error accepting connection: %s\n", err), logger.ERROR)
+			return
 		}
 		defer conn.Close()
 

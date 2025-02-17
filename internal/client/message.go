@@ -16,7 +16,7 @@ import (
 // is not a valid event, then an error will be thrown.
 func (c *TcpClient) HandleMessage(msg []byte) {
 	// Print the message to the client's logger, for debugging purposes.
-	c.Logger.Log(string(msg)+"\n", logger.INFO)
+	c.Logger.Log(string(msg)+"\n", logger.DEBUG)
 
 	event, err := events.Parser(msg)
 	if err != nil {

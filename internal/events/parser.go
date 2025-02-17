@@ -17,7 +17,7 @@ func _eventType(data []byte) (interface{}, error) {
 		Event string `json:"event"`
 	}
 	if err := json.Unmarshal(data, &eventType); err != nil {
-		return nil, fmt.Errorf("failed to determine event type: %w", err)
+		return nil, fmt.Errorf("failed to determine event type: %s", err)
 	}
 
 	var event interface{}

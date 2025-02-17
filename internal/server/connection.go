@@ -60,7 +60,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 		// This is where the messages should be parsed and processed.
 		if n > 0 {
 			// Displaying the message received from the client
-			s.Logger.Log(fmt.Sprintf("%s\n", string(buf[:n])))
+			s.Logger.Log(fmt.Sprintf("%s\n", string(buf[:n])), logger.DEBUG)
 
 			event, err := events.Parser(buf[:n])
 			if err != nil {
@@ -70,7 +70,7 @@ func (s *TcpServer) HandleConnection(conn net.Conn) {
 			}
 
 			// Handle the event. A check for authorization should be done
-			// in the handlers for the events, because there is no way to
+			// in the handlers for the events, because there is no way to,
 			// get data from the raw interface{} type until it has been
 			// type asserted.
 			eventType := reflect.TypeOf(event).Elem()
