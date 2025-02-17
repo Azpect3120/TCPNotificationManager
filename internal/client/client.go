@@ -132,6 +132,7 @@ func NewTCPClient(opts ...ClientOptsFunc) *TcpClient {
 	// is received by the client.
 	RegisterEventHandler(client, "ConnectionAcceptedEvent", ConnectionAcceptedHandler)
 	RegisterEventHandler(client, "ClientAuthenticatedEvent", ClientAuthenticatedHandler)
+	RegisterEventHandler(client, "ClientDisconnectedEvent", ClientDisconnectedHandler)
 
 	return client
 }

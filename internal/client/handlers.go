@@ -16,12 +16,22 @@ func ConnectionAcceptedHandler(client *TcpClient, event *events.ConnectionAccept
 	client.Logger.Log(fmt.Sprintf("Client ID set to: %s\n", client.ID), logger.DEBUG)
 }
 
-// Handel the ClientAuthenticatedEvent sent by the server to the client. This
+// Handle the ClientAuthenticatedEvent sent by the server to the client. This
 // event is sent when the server has authenticated the client. This function
 // does not really do anything important, but it prints debug messages.
 //
 // TODO: Implement UI features here.
 func ClientAuthenticatedHandler(client *TcpClient, event *events.ClientAuthenticatedEvent) {
 	msg := fmt.Sprintf("New client authenticated: %s\n", event.Content.ClientID)
+	client.Logger.Log(msg, logger.INFO)
+}
+
+// Handle the ClientDisconnectedEvent sent by the server to the client. This
+// event is sent when the server has authenticated the client. This function
+// does not really do anything important, but it prints debug messages.
+//
+// TODO: Implement UI features here.
+func ClientDisconnectedHandler(client *TcpClient, event *events.ClientDisconnectedEvent) {
+	msg := fmt.Sprintf("Client disconnected: %s\n", event.Content.ClientID)
 	client.Logger.Log(msg, logger.INFO)
 }
