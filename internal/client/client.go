@@ -8,6 +8,7 @@ import (
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
 	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
+	"github.com/Azpect3120/TCPNotificationManager/internal/notify"
 )
 
 // Function symbol used to configure the client
@@ -217,4 +218,13 @@ func (c *TcpClient) Disconnect(conn net.Conn) {
 	}
 	c.Logger.Log(fmt.Sprintf("Disconnecting from server: %s\n", c.ID), logger.DEBUG)
 	conn.Write(bytes)
+}
+
+// Use the notify package to send a notification to the client's
+// desktop. This function is only used by the client, as the server
+// has no GUI or reason to have a UI/UX.
+func (c *TcpClient) Notify(title, message string) {
+	if err := notify.Notify(title, message); err != nil {
+		c.Logger.Log(fmt.Sprintf("Error sending notification: %v", err), logger.ERROR)
+	}
 }
