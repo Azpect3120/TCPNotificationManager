@@ -42,6 +42,6 @@ func ClientDisconnectedHandler(client *TcpClient, event *events.ClientDisconnect
 //
 // TODO: Implement UI features here.
 func BroadcastMessageHandler(client *TcpClient, event *events.BroadcastMessageEvent) {
-	msg := fmt.Sprintf("Broadcast message received: %s\n", event.Content.Message)
+	msg := fmt.Sprintf("(%s): %s\n", event.Content.Sender, event.Content.Message)
 	client.Logger.Log(msg, logger.INFO)
 }

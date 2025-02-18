@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,19 +47,14 @@ func main() {
 
 	// Create a simple UI for sending messages via the terminal
 	go func() {
-		var str string
-		for {
-			n, err := fmt.Scanln(&str)
-			if err != nil {
-				c.Logger.Log(fmt.Sprintf("Error reading input: %s\n", err), logger.ERROR)
-			}
-			if n > 0 {
-				c.Logger.Log(fmt.Sprintf("Sending message: %s\n", str), logger.DEBUG)
-				if msg, err := json.Marshal(events.NewSendMessageEvent(c.ID, str)); err != nil {
-					c.Logger.Log(fmt.Sprintf("Error marshaling message: %s\n", err), logger.ERROR)
-				} else {
-					conn.Write(msg)
-				}
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			line := scanner.Text()
+			c.Logger.Log(fmt.Sprintf("Sending message: %s\n", line), logger.DEBUG)
+			if msg, err := json.Marshal(events.NewSendMessageEvent(c.ID, line)); err != nil {
+				c.Logger.Log(fmt.Sprintf("Error marshaling message: %s\n", err), logger.ERROR)
+			} else {
+				conn.Write(msg)
 			}
 		}
 	}()
