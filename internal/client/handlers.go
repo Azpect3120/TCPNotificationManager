@@ -14,6 +14,8 @@ import (
 func ConnectionAcceptedHandler(client *TcpClient, event *events.ConnectionAcceptedEvent) {
 	client.ID = event.Content.ClientID
 	client.Logger.Log(fmt.Sprintf("Client ID set to: %s\n", client.ID), logger.DEBUG)
+
+	client.Notify("Gophernest", fmt.Sprintf("Client ID updated: %s", event.Content.ClientID))
 }
 
 // Handle the ClientAuthenticatedEvent sent by the server to the client. This
@@ -24,6 +26,8 @@ func ConnectionAcceptedHandler(client *TcpClient, event *events.ConnectionAccept
 func ClientAuthenticatedHandler(client *TcpClient, event *events.ClientAuthenticatedEvent) {
 	msg := fmt.Sprintf("New client authenticated: %s\n", event.Content.ClientID)
 	client.Logger.Log(msg, logger.INFO)
+
+	client.Notify("Gophernest", fmt.Sprintf("Client authenticated: %s", event.Content.ClientID))
 }
 
 // Handle the ClientDisconnectedEvent sent by the server to the client. This
@@ -34,6 +38,8 @@ func ClientAuthenticatedHandler(client *TcpClient, event *events.ClientAuthentic
 func ClientDisconnectedHandler(client *TcpClient, event *events.ClientDisconnectedEvent) {
 	msg := fmt.Sprintf("Client disconnected: %s\n", event.Content.ClientID)
 	client.Logger.Log(msg, logger.INFO)
+
+	client.Notify("Gophernest", fmt.Sprintf("Client disconnected: %s", event.Content.ClientID))
 }
 
 // Handle the BroadcastMessageEvent sent by the server to the client. This
@@ -44,4 +50,6 @@ func ClientDisconnectedHandler(client *TcpClient, event *events.ClientDisconnect
 func BroadcastMessageHandler(client *TcpClient, event *events.BroadcastMessageEvent) {
 	msg := fmt.Sprintf("(%s): %s\n", event.Content.Sender, event.Content.Message)
 	client.Logger.Log(msg, logger.INFO)
+
+	client.Notify(fmt.Sprintf("Gophernest: %s", event.Content.Sender), event.Content.Message)
 }
