@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/Azpect3120/TCPNotificationManager/internal/client"
 	"github.com/Azpect3120/TCPNotificationManager/internal/events"
+	"github.com/Azpect3120/TCPNotificationManager/internal/logger"
 )
 
 func main() {
@@ -41,6 +43,25 @@ func main() {
 	}
 
 	conn.Write(msg)
+
+	// Create a simple UI for sending messages via the terminal
+	go func() {
+		var str string
+		for {
+			n, err := fmt.Scanln(&str)
+			if err != nil {
+				c.Logger.Log(fmt.Sprintf("Error reading input: %s\n", err), logger.ERROR)
+			}
+			if n > 0 {
+				c.Logger.Log(fmt.Sprintf("Sending message: %s\n", str), logger.DEBUG)
+				if msg, err := json.Marshal(events.NewSendMessageEvent(c.ID, str)); err != nil {
+					c.Logger.Log(fmt.Sprintf("Error marshaling message: %s\n", err), logger.ERROR)
+				} else {
+					conn.Write(msg)
+				}
+			}
+		}
+	}()
 
 	buf := make([]byte, 1024)
 	for {
