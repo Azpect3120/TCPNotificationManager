@@ -35,3 +35,13 @@ func ClientDisconnectedHandler(client *TcpClient, event *events.ClientDisconnect
 	msg := fmt.Sprintf("Client disconnected: %s\n", event.Content.ClientID)
 	client.Logger.Log(msg, logger.INFO)
 }
+
+// Handle the BroadcastMessageEvent sent by the server to the client. This
+// event is sent when the server has authenticated the client. This function
+// does not really do anything important, but it prints debug messages.
+//
+// TODO: Implement UI features here.
+func BroadcastMessageHandler(client *TcpClient, event *events.BroadcastMessageEvent) {
+	msg := fmt.Sprintf("Broadcast message received: %s\n", event.Content.Message)
+	client.Logger.Log(msg, logger.INFO)
+}

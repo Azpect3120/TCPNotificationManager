@@ -184,6 +184,7 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	// is received by the server.
 	RegisterEventHandler(server, "RequestAuthenticationEvent", RequestAuthenticationHandler)
 	RegisterEventHandler(server, "ClientDisconnectingEvent", ClientDisconnectingHandler)
+	RegisterEventHandler(server, "SendMessageEvent", SendMessageHandler)
 
 	return server
 }

@@ -6,7 +6,11 @@
   - [Server Sent Events](#server-sent-events)
     - [Accepted Connection](#accepted-connection)
     - [Refused Connection](#refused-connection)
-  - [Client Send Events](#client-send-events)
+    - [Client Authenticated](#client-authenticated)
+    - [Client Disconnected](#client-disconnected)
+  - [Client Sent Events](#client-sent-events)
+    - [Request Authentication](#request-authentication)
+    - [Disconnecting](#disconnecting)
 <!--toc:end-->
 
 
@@ -114,6 +118,26 @@ two reasons: 1) it would be stupid, 2) the client is disconnected, so they can't
 }
 ```
 
+### Broadcast Message
+
+When a client sends a message to the server, the server will broadcast that message to all other clients connected.
+This event will contain the content and the sender of the message. The server will not send the message back to the 
+sender, that would be silly.
+
+Like all other events, only authenticated clients will receive this broadcast.
+
+```json
+{
+    "event": "broadcast_message",
+    "id": "[server_id]",
+    "content": {
+        "message": "[message]",
+        "sender": "[client_id]"
+    },
+    "timestamp": "[timestamp]"
+}
+```
+
 
 ## Client Sent Events
 
@@ -155,6 +179,23 @@ from the list of connected clients and send a `client_disconnected` event to all
     "event": "disconnecting",
     "id": "[client_id]",
     "content": {},
+    "timestamp": "[timestamp]"
+}
+```
+
+### Send Message
+
+When a client wants to send a message to the server, they will send a `send_message` event to the server.
+This message can be anything, and the server will simply broadcast the message to all other clients connected
+and authenticated. This can be used as a simple messaging system, once a UI has been implemented.
+
+```json
+{
+    "event": "send_message",
+    "id": "[client_id]",
+    "content": {
+        "message": "[message]"
+    },
     "timestamp": "[timestamp]"
 }
 ```

@@ -34,6 +34,10 @@ func _eventType(data []byte) (interface{}, error) {
 		event = &ClientDisconnectingEvent{}
 	case "client_disconnected":
 		event = &ClientDisconnectedEvent{}
+	case "send_message":
+		event = &SendMessageEvent{}
+	case "broadcast_message":
+		event = &BroadcastMessageEvent{}
 	default:
 		return nil, fmt.Errorf("Event type '%s' has not been implemented.", eventType.Event)
 	}

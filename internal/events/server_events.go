@@ -74,3 +74,25 @@ func NewClientDisconnectedEvent(serverID, clientID string) ClientDisconnectedEve
 		},
 	}
 }
+
+// Create and return a new BroadcastMessageEvent. This function does not
+// generate any details, instead it requires all details as arguments. Which
+// should be generated elsewhere.
+//
+// The message should be a complete string, nothing will be done in this function
+// to ensure that the message is valid, or formatted.
+//
+// All timestamps will be sent back in UTC format.
+func NewBroadcastMessageEvent(serverID, clientID, message string) BroadcastMessageEvent {
+	return BroadcastMessageEvent{
+		BaseEvent: BaseEvent{
+			Event:     "broadcast_message",
+			ID:        serverID,
+			Timestamp: time.Now().UTC(),
+		},
+		Content: BroadcastMessageContent{
+			Sender:  clientID,
+			Message: message,
+		},
+	}
+}

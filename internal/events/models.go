@@ -87,3 +87,28 @@ type ClientDisconnectedEvent struct {
 	BaseEvent
 	Content ClientDisconnectedContent `json:"content"`
 }
+
+// Stores the content that should be inside the event.
+type BroadcastMessageContent struct {
+	Message string `json:"message"`
+	Sender  string `json:"sender"`
+}
+
+// Event sent by the server to the client when a client sends
+// a message to the server.
+type BroadcastMessageEvent struct {
+	BaseEvent
+	Content BroadcastMessageContent `json:"content"`
+}
+
+// Stores the content that should be inside the event.
+type SendMessageContent struct {
+	Message string `json:"message"`
+}
+
+// Event sent by the client to the server when a client sends
+// a message to the server.
+type SendMessageEvent struct {
+	BaseEvent
+	Content SendMessageContent `json:"content"`
+}

@@ -82,3 +82,30 @@ func ClientDisconnectingHandler(server *TcpServer, conn net.Conn, event *events.
 		}
 	}
 }
+
+// When a client sends a message to the server, this function will be called.
+// This function will handle the message and broadcast it to all other clients.
+//
+// Handling the message will include checking if the client is authenticated, and
+// if the message is valid. If the client is not authenticated, the message will
+// be ignored.
+func SendMessageHandler(server *TcpServer, conn net.Conn, event *events.SendMessageEvent) {
+	// Check if the client is authenticated
+	if event.ID == "" {
+		server.Logger.Log(fmt.Sprintf("Client ID is empty\n"), logger.ERROR)
+	} else if _, ok := server.Authorized[event.ID]; !ok {
+		server.Logger.Log(fmt.Sprintf("Client '%s' is not authenticated\n", event.ID), logger.ERROR)
+		return
+	}
+
+	// Broadcast the message to all clients
+	message, err := json.Marshal(events.NewBroadcastMessageEvent(server.ID, event.ID, event.Content.Message))
+	if err != nil {
+		server.Logger.Log(fmt.Sprintf("Error marshalling response: %s\n", err), logger.ERROR)
+	} else {
+		errs := server.BroadcastMessage(message, conn)
+		for _, err := range errs {
+			server.Logger.Log(fmt.Sprintf("Error broadcasting message: %s\n", err), logger.ERROR)
+		}
+	}
+}
