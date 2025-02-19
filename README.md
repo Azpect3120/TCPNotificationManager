@@ -242,5 +242,5 @@ and authenticated. This can be used as a simple messaging system, once a UI has 
 ```
 <!-- EVENTS_END -->
 
-<!-- ERRORS_START -->
-<!-- ERRORS_END -->
+<!-- ERROR_CODES_START -->
+<!-- ERROR_CODES_END -->
