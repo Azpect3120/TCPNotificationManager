@@ -3,7 +3,7 @@ name: Update README with Events
 on:
   push:
     branches:
-      - master # Or your main branch name
+      - master
 
 jobs:
   update-readme:
@@ -16,7 +16,7 @@ jobs:
         id: extract_events
         run: |
           CONTENT=$(cat doc/events.md)
-          echo "::set-output name=events_content::$CONTENT"
+          echo "events_content=$CONTENT" >> $GITHUB_ENV  # Use environment file
 
       - name: Update README
         id: update_readme
@@ -26,9 +26,8 @@ jobs:
           script: |
             const fs = require('fs');
             let readme = fs.readFileSync('./README.md', 'utf8');
-            const eventsContent = '${{ steps.extract_events.outputs.events_content }}';
+            const eventsContent = process.env.events_content;
 
-            // Find the "## Events" heading
             const eventsHeading = '## Events';
             const eventsIndex = readme.indexOf(eventsHeading);
 
@@ -37,10 +36,9 @@ jobs:
               return;
             }
 
-            // Find the next heading (or end of file) to determine insertion point
-            let nextHeadingIndex = readme.indexOf('## ', eventsIndex + eventsHeading.length); // Find next heading
-            if(nextHeadingIndex === -1) {
-                nextHeadingIndex = readme.length; // Insert at the end
+            let nextHeadingIndex = readme.indexOf('## ', eventsIndex + eventsHeading.length);
+            if (nextHeadingIndex === -1) {
+              nextHeadingIndex = readme.length;
             }
 
             const newReadme = readme.substring(0, eventsIndex + eventsHeading.length) + '\n\n' + eventsContent + '\n' + readme.substring(nextHeadingIndex);
@@ -48,7 +46,8 @@ jobs:
             fs.writeFileSync('./README.md', newReadme, 'utf8');
 
       - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: ad-m/github-push-action@master # Updated action
         with:
-          commit_message: 'Update README with events'
-          file: README.md
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }} # Push to the same branch
+          force: false # Prevent push if no changes
