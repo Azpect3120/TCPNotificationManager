@@ -1,0 +1,54 @@
+name: Update README with Events
+
+on:
+  push:
+    branches:
+      - master # Or your main branch name
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract events content
+        id: extract_events
+        run: |
+          CONTENT=$(cat doc/events.md)
+          echo "::set-output name=events_content::$CONTENT"
+
+      - name: Update README
+        id: update_readme
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let readme = fs.readFileSync('./README.md', 'utf8');
+            const eventsContent = '${{ steps.extract_events.outputs.events_content }}';
+
+            // Find the "## Events" heading
+            const eventsHeading = '## Events';
+            const eventsIndex = readme.indexOf(eventsHeading);
+
+            if (eventsIndex === -1) {
+              core.setFailed('## Events heading not found in README.md');
+              return;
+            }
+
+            // Find the next heading (or end of file) to determine insertion point
+            let nextHeadingIndex = readme.indexOf('## ', eventsIndex + eventsHeading.length); // Find next heading
+            if(nextHeadingIndex === -1) {
+                nextHeadingIndex = readme.length; // Insert at the end
+            }
+
+            const newReadme = readme.substring(0, eventsIndex + eventsHeading.length) + '\n\n' + eventsContent + '\n' + readme.substring(nextHeadingIndex);
+
+            fs.writeFileSync('./README.md', newReadme, 'utf8');
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Update README with events'
+          file: README.md
