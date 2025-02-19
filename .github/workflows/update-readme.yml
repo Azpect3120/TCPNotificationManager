@@ -1,4 +1,4 @@
-name: Update README with Events
+name: Update README with Events and Error Codes
 
 on:
   push:
@@ -16,12 +16,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Insert events into README
+      - name: Insert events and error codes into README
         run: |
-          CONTENT=$(cat doc/events.md)
-          awk -v content="$CONTENT" '
+          EVENTS_CONTENT=$(cat doc/events.md)
+          ERROR_CODES_CONTENT=$(cat doc/error_codes.md)
+
+          awk -v content="$EVENTS_CONTENT" '
             /<!-- EVENTS_START -->/ {print; print content; inBlock=1; next}
             /<!-- EVENTS_END -->/ {inBlock=0}
+            !inBlock' README.md > temp.md && mv temp.md README.md
+
+          awk -v content="$ERROR_CODES_CONTENT" '
+            /<!-- ERROR_CODES_START -->/ {print; print content; inBlock=1; next}
+            /<!-- ERROR_CODES_END -->/ {inBlock=0}
             !inBlock' README.md > temp.md && mv temp.md README.md
 
       - name: Commit and push changes
@@ -31,5 +38,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "Update README with latest events" || exit 0
+          git commit -m "Update README with latest events and error codes" || exit 0
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}

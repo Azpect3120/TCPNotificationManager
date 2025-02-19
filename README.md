@@ -6,7 +6,8 @@
   - [The Solution](#the-solution)
   - [Dependencies](#dependencies)
       - [Linux](#linux)
-  - [Events](#events)
+- [Events](#events)
+- [Error Codes](#error-codes)
 <!--toc:end-->
 
 ## The Problem
@@ -35,7 +36,10 @@ If you have experience with Linux and GoLang, setting up this application should
 
 #### Linux
 
-- notify-send
+- [notify-send](https://man.archlinux.org/man/notify-send.1.en)
 
 <!-- EVENTS_START -->
 <!-- EVENTS_END -->
+
+<!-- ERRORS_START -->
+<!-- ERRORS_END -->
