@@ -37,5 +37,5 @@ If you have experience with Linux and GoLang, setting up this application should
 
 - notify-send
 
-
-## Events
+<!-- EVENTS_START -->
+<!-- EVENTS_END -->

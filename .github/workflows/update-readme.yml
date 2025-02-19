@@ -8,46 +8,23 @@ on:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
-      - name: Extract events content
-        id: extract_events
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Insert events into README
         run: |
           CONTENT=$(cat doc/events.md)
-          echo "events_content=$CONTENT" >> $GITHUB_ENV  # Use environment file
-
-      - name: Update README
-        id: update_readme
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            let readme = fs.readFileSync('./README.md', 'utf8');
-            const eventsContent = process.env.events_content;
-
-            const eventsHeading = '## Events';
-            const eventsIndex = readme.indexOf(eventsHeading);
-
-            if (eventsIndex === -1) {
-              core.setFailed('## Events heading not found in README.md');
-              return;
-            }
-
-            let nextHeadingIndex = readme.indexOf('## ', eventsIndex + eventsHeading.length);
-            if (nextHeadingIndex === -1) {
-              nextHeadingIndex = readme.length;
-            }
-
-            const newReadme = readme.substring(0, eventsIndex + eventsHeading.length) + '\n\n' + eventsContent + '\n' + readme.substring(nextHeadingIndex);
-
-            fs.writeFileSync('./README.md', newReadme, 'utf8');
+          awk -v content="$CONTENT" '
+            /<!-- EVENTS_START -->/ {print; print content; inBlock=1; next}
+            /<!-- EVENTS_END -->/ {inBlock=0}
+            !inBlock' README.md > temp.md && mv temp.md README.md
 
       - name: Commit and push changes
-        uses: ad-m/github-push-action@master # Updated action
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }} # Push to the same branch
-          force: false # Prevent push if no changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update README with latest events" || exit 0
+          git push
