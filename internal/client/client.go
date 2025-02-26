@@ -170,7 +170,7 @@ func (c *TcpClient) Configure(certPath, keyPath, serverName string) *TcpClient {
 		// RootCAs:    certPool,
 		Certificates:       []tls.Certificate{cert},
 		ServerName:         serverName,
-		InsecureSkipVerify: true, // ONLY FOR TESTING - NEVER IN PRODUCTION
+		InsecureSkipVerify: false, // ONLY FOR TESTING - NEVER IN PRODUCTION
 	}
 
 	return c

@@ -17,8 +17,11 @@ import (
 )
 
 func main() {
-	c := client.NewTCPClient(client.WithPort(3000), client.WithTLS())
+	c := client.NewTCPClient(client.WithPort(3005), client.WithTLS(), client.WithAddr("vpn.gophernest.net"))
 	conn := c.Configure("./certs/client.crt", "./certs/client.key", "localhost").Connect()
+	for _, err := range c.Errors {
+		panic(err)
+	}
 
 	// Graceful shutdown handling, capture SIGINT and SIGTERM
 	// Capture Ctrl+C (SIGINT) and other termination requests (SIGTERM)

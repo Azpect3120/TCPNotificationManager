@@ -216,8 +216,9 @@ func (s *TcpServer) Configure(certPath, keyPath string) *TcpServer {
 	s.TLSConfig = &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		// Verifying isn't working right now, need to get certs signed by CA
-		ClientAuth:         tls.RequestClientCert, // Use tls.RequireAndVerifyClientCert for production and security
-		InsecureSkipVerify: true,                  // ONLY FOR TESTING - NEVER IN PRODUCTION
+		//ClientAuth:         tls.RequestClientCert, // Use tls.RequireAndVerifyClientCert for production and security
+		ClientAuth:         tls.RequireAndVerifyClientCert, // Use tls.RequireAndVerifyClientCert for production and security
+		InsecureSkipVerify: false,                          // ONLY FOR TESTING - NEVER IN PRODUCTION
 	}
 
 	return s
