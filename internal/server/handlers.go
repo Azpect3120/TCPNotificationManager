@@ -10,7 +10,8 @@ import (
 	"github.com/Azpect3120/TCPNotificationManager/internal/utils"
 )
 
-// When the client sends a request to authenticate, this function will be called.
+// RequestAuthenticationHandler When the client sends a request to authenticate,
+// this function will be called.
 // This function will handle the request and send a response back to the client.
 //
 // This function assumes there is space in the server for the client to connect,
@@ -58,10 +59,10 @@ func RequestAuthenticationHandler(server *TcpServer, conn net.Conn, event *event
 	}
 }
 
-// When a client disconnects from the server, this function will be called on
-// the server. This function will handle the disconnection and remove the client
-// from the authenticated map. Additionally, the server will broadcast the
-// disconnection event to all other clients.
+// ClientDisconnectingHandler When a client disconnects from the server, this function
+// will be called on the server.
+// This function will handle the disconnection and remove the client from the authenticated map.
+// Additionally, the server will broadcast the disconnection event to all other clients.
 //
 // Each client is removed from the server's connections slice when they disconnect,
 // so there is no need to remove them here.
@@ -83,7 +84,7 @@ func ClientDisconnectingHandler(server *TcpServer, conn net.Conn, event *events.
 	}
 }
 
-// When a client sends a message to the server, this function will be called.
+// SendMessageHandler When a client sends a message to the server, this function will be called.
 // This function will handle the message and broadcast it to all other clients.
 //
 // Handling the message will include checking if the client is authenticated, and
