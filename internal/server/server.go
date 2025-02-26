@@ -189,7 +189,7 @@ func NewTCPServer(opts ...ServerOptsFunc) *TcpServer {
 	return server
 }
 
-// This function is used to configure the TLS settings for the server.
+// Configure This function is used to configure the TLS settings for the server.
 // It is only required if you intend to use TLS, otherwise, there is no
 // need to run this function.
 //
