@@ -9,7 +9,7 @@ import (
 
 // TODO: Implement port backtesting. When when fails, try the next one until we get a open port.
 func main() {
-	s := server.NewTCPServer(server.WithPort(3000), server.WithTLS(), server.WithMaxConn(2))
+	s := server.NewTCPServer(server.WithPort(3005), server.WithTLS(), server.WithMaxConn(2))
 	ln := s.Configure("./certs/server.crt", "./certs/server.key").Listen()
 	for _, err := range s.Errors {
 		panic(err)
