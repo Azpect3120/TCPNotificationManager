@@ -17,8 +17,8 @@ import (
 )
 
 func main() {
-	c := client.NewTCPClient(client.WithPort(3005), client.WithTLS(), client.WithAddr("vpn.gophernest.net"))
-	conn := c.Configure("./certs/client.crt", "./certs/client.key", "localhost").Connect()
+	c := client.NewTCPClient(client.WithPort(3005), client.WithAddr("vpn.gophernest.net"))
+	conn := c.Configure("./certs/client.crt", "./certs/client.key", "vpn.gophernest.net").Connect()
 	for _, err := range c.Errors {
 		panic(err)
 	}
